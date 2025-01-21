@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setpoint Control</title>
     <style>
+        /* ... style tetap sama ... */
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -81,8 +82,18 @@
     <script>
         let ws;
         
+        function getWebSocketUrl() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const host = window.location.hostname;
+            const port = '8765'; // sesuaikan dengan port WebSocket server Anda
+            return `${protocol}//${host}:${port}`;
+        }
+        
         function connectWebSocket() {
-            ws = new WebSocket('ws://localhost:8765');
+            const wsUrl = getWebSocketUrl();
+            console.log('Connecting to WebSocket:', wsUrl);
+            
+            ws = new WebSocket(wsUrl);
             
             ws.onopen = () => {
                 showStatus('Connected to server', 'success');
@@ -92,10 +103,12 @@
             };
             
             ws.onerror = (error) => {
-                showStatus('Connection error! Please refresh the page.', 'error');
+                console.error('WebSocket error:', error);
+                showStatus('Connection error! Please check console for details.', 'error');
             };
             
-            ws.onclose = () => {
+            ws.onclose = (event) => {
+                console.log('WebSocket closed:', event.code, event.reason);
                 showStatus('Connection lost. Reconnecting...', 'error');
                 setTimeout(connectWebSocket, 3000);
             };
